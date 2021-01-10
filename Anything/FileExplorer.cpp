@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "util.h"
+#include <string>
 #include <cmath>
 
 //Displays file in directory + displays and takes commands
@@ -65,37 +66,30 @@ void getDir(std::string dir)
 }
 
 //gets the size of files and directories
-float getFileSize(std::string dir, float fileBytes)
+void getFileSize(std::experimental::filesystem::path const& dir)
 {
-	float fileMbs{};
-
-	if (std::experimental::filesystem::is_directory(dir))
+	try
 	{
-		for (const auto& entry : std::experimental::filesystem::directory_iterator(dir))
+		if (std::experimental::filesystem::is_directory(dir))
 		{
-			if (std::experimental::filesystem::is_directory(entry.path()))
+			for (const auto& entry : std::experimental::filesystem::directory_iterator(dir))
 			{
-				for (const auto& entry1 : std::experimental::filesystem::directory_iterator(entry.path()))
+				if (std::experimental::filesystem::is_directory(entry.path()))
 				{
-					fileBytes += std::experimental::filesystem::file_size(entry1.path());
+					getFileSize(entry.path());
+				}
+				else
+				{
+					std::cout << entry.path() << "\t\t" << std::experimental::filesystem::file_size(entry.path()) * 0.0009765625 << "\n"; //temp output in KB
 				}
 			}
-			else
-			{
-				fileBytes += std::experimental::filesystem::file_size(entry.path());
-			}
+		}
+		else
+		{
+			std::cout << dir << "\t\t" << std::experimental::filesystem::file_size(dir) * 0.0009765625 << "\n"; //temp output in KB
 		}
 	}
-	else
-	{
-		fileBytes += std::experimental::filesystem::file_size(dir);
-	}
-
-	if (fileBytes >= 1048576)
-	{
-		fileMbs = fileBytes / 1048576; //setting number to mbs in binary to match disk size in windows 
-	}
-	return round(fileMbs);
+	catch (const std::exception& e) { std::cout << e.what(); }
 }
 
 //lets user search for a directory, needs entire path for now, will attempt to change that later
@@ -112,9 +106,9 @@ std::string dirChoose()
 
 int main()
 {
-	float fileSize = 0;
-	fileSize = getFileSize("C:\\Users\\pless\\AppData\\Local\\Programs\\r2modman", fileSize); //testing just ignore this
-	std::cout << fileSize;
+	uintmax_t fileSize = 0;
 
 	//dirChoose();
+	getFileSize("C:\\Users\\pless\\Desktop\\rpcs3"); //testing just ignore this
+
 }
