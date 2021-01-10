@@ -4,7 +4,7 @@
 //Displays file in directory + displays and takes commands
 void commandMenu(std::vector<std::string> vec_dir_files)
 {
-	for (int i=0;i!=vec_dir_files.size();i++)
+	for (int i=0; i!=vec_dir_files.size(); i++)
 	{
 		printf("[%i]%s\n", i, vec_dir_files[i].c_str());
 	}
@@ -41,6 +41,7 @@ void getDir(std::string dir)
 {
 	std::vector<std::string> vec_dir_files;
 	int counter = 0;
+
 	for (const auto& entry : std::experimental::filesystem::directory_iterator(dir))
 	{
 		auto path = entry.path();
@@ -51,7 +52,6 @@ void getDir(std::string dir)
 		{
 			if (fpath[i] == '/')
 				fpath[i] = '\\';
-
 		}
 
 		if (std::experimental::filesystem::is_directory(fpath))
@@ -63,7 +63,39 @@ void getDir(std::string dir)
 	commandMenu(vec_dir_files);
 }
 
+//gets the size of a directory, only returns 0 for some reason, not sure why
+void getFileSize(std::string dir, uintmax_t size)
+{
+	if (std::experimental::filesystem::is_directory(dir))
+	{
+		for (const auto& entry : std::experimental::filesystem::directory_iterator(dir))
+		{
+			size += std::experimental::filesystem::file_size(entry.path());
+		}
+	}
+	else
+	{
+		size += std::experimental::filesystem::file_size(dir);
+	}
+}
+
+//lets user search for a directory, needs entire path for now, will attempt to change that later
+std::string dirChoose()
+{
+	std::string chosenDir;
+	std::cout << "Please input a directory path to open: " << std::endl;
+	std::cin >> chosenDir;
+	
+	getDir(chosenDir);
+
+	return chosenDir;
+}
+
 int main()
 {
-	getDir("C:\\Users\\deiii\\Downloads");
+	uintmax_t test = 0;
+	getFileSize("C:\\Users\\pless\\AppData\\Local\\Programs\\r2modman\\r2modman.exe", test); //testing just ignore this
+	std::cout << test;
+
+	//dirChoose();
 }
