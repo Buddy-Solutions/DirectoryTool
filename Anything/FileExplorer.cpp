@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "util.h"
+#include <cmath>
 
 //Displays file in directory + displays and takes commands
 void commandMenu(std::vector<std::string> vec_dir_files)
@@ -63,20 +64,38 @@ void getDir(std::string dir)
 	commandMenu(vec_dir_files);
 }
 
-//gets the size of a directory, only returns 0 for some reason, not sure why
-void getFileSize(std::string dir, uintmax_t size)
+//gets the size of files and directories
+float getFileSize(std::string dir, float fileBytes)
 {
+	float fileMbs{};
+
 	if (std::experimental::filesystem::is_directory(dir))
 	{
 		for (const auto& entry : std::experimental::filesystem::directory_iterator(dir))
 		{
-			size += std::experimental::filesystem::file_size(entry.path());
+			if (std::experimental::filesystem::is_directory(entry.path()))
+			{
+				for (const auto& entry1 : std::experimental::filesystem::directory_iterator(entry.path()))
+				{
+					fileBytes += std::experimental::filesystem::file_size(entry1.path());
+				}
+			}
+			else
+			{
+				fileBytes += std::experimental::filesystem::file_size(entry.path());
+			}
 		}
 	}
 	else
 	{
-		size += std::experimental::filesystem::file_size(dir);
+		fileBytes += std::experimental::filesystem::file_size(dir);
 	}
+
+	if (fileBytes >= 1048576)
+	{
+		fileMbs = fileBytes / 1048576; //setting number to mbs in binary to match disk size in windows 
+	}
+	return round(fileMbs);
 }
 
 //lets user search for a directory, needs entire path for now, will attempt to change that later
@@ -93,9 +112,9 @@ std::string dirChoose()
 
 int main()
 {
-	uintmax_t test = 0;
-	getFileSize("C:\\Users\\pless\\AppData\\Local\\Programs\\r2modman\\r2modman.exe", test); //testing just ignore this
-	std::cout << test;
+	float fileSize = 0;
+	fileSize = getFileSize("C:\\Users\\pless\\AppData\\Local\\Programs\\r2modman", fileSize); //testing just ignore this
+	std::cout << fileSize;
 
 	//dirChoose();
 }
