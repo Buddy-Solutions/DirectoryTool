@@ -1,19 +1,15 @@
-#include "stdafx.h"
-#include "util.h"
-#include <string>
-#include <cmath>
+#include "FileExplorer.h"
 
-//Displays file in directory + displays and takes commands
-void commandMenu(std::vector<std::string> vec_dir_files)
+void FileExplorer::commandMenu(std::vector<std::string> vec_dir_files, std::string dir)
 {
-	for (int i=0; i!=vec_dir_files.size(); i++)
+	for (int i = 0; i != vec_dir_files.size(); i++)
 	{
 		printf("[%i]%s\n", i, vec_dir_files[i].c_str());
 	}
 
 	std::cout << std::endl;
 	std::cout << "Input {file number} {commmand} {extra arguments}" << std::endl;
-	std::cout << "Commands: \nd - Delete\nh - Hide\nu - unhide" << std::endl;
+	std::cout << "Commands: \nd - Delete\nh - Hide\nu - unhide\ne - enter" << std::endl;
 	std::cout << "Example: 0 d (Deletes the first file listed)" << std::endl << std::endl;
 	std::cout << "Command: ";
 	int file;
@@ -31,15 +27,20 @@ void commandMenu(std::vector<std::string> vec_dir_files)
 			break;
 		case 'u':
 			util::file_change_attributes(selectedFile, util::file_normal);
+			break;
+		case 'e':
+			getDir(selectedFile);
+			break;
 		default:
 			std::cout << "Incorrect command\n\n";
-			commandMenu(vec_dir_files);
+			commandMenu(vec_dir_files, dir);
 			break;
 	}
+
+	getDir(selectedFile.substr(0, selectedFile.find_last_of('\\')));
 }
 
-//Get files in directory and sends them to a command menu for that directory
-void getDir(std::string dir)
+void FileExplorer::getDir(std::string dir)
 {
 	std::vector<std::string> vec_dir_files;
 	int counter = 0;
@@ -62,11 +63,10 @@ void getDir(std::string dir)
 		vec_dir_files.push_back(fpath);
 		counter++;
 	}
-	commandMenu(vec_dir_files);
+	commandMenu(vec_dir_files, dir);
 }
 
-//gets the size of files and directories
-void getFileSize(std::experimental::filesystem::path const& dir)
+void FileExplorer::getFileSize(std::experimental::filesystem::path const& dir)
 {
 	try
 	{
@@ -92,23 +92,15 @@ void getFileSize(std::experimental::filesystem::path const& dir)
 	catch (const std::exception& e) { std::cout << e.what(); }
 }
 
-//lets user search for a directory, needs entire path for now, will attempt to change that later
-std::string dirChoose()
+void FileExplorer::dirChoose()
 {
 	std::string chosenDir;
 	std::cout << "Please input a directory path to open: " << std::endl;
 	std::cin >> chosenDir;
-	
 	getDir(chosenDir);
-
-	return chosenDir;
 }
 
 int main()
 {
-	uintmax_t fileSize = 0;
-
-	//dirChoose();
-	getFileSize("C:\\Users\\pless\\Desktop\\rpcs3"); //testing just ignore this
-
+	FileExplorer::dirChoose();
 }
